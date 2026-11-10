@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>奇数贪心轨道：分子有界情形的部分结果与开放问题</title>
+<style>
+  @page { size: A4; margin: 2.2cm 2cm; }
+  body { font-family: "Noto Serif CJK TC", "Noto Serif CJK SC", serif; font-size: 11pt; line-height: 1.75; color: #111; }
+  h1 { font-size: 17pt; text-align: center; margin: 0 0 0.4em 0; }
+  .author { text-align: center; font-size: 11pt; margin: 0; }
+  .date { text-align: center; font-size: 10pt; color: #444; margin-bottom: 1.4em; }
+  h2 { font-size: 13pt; margin: 1.5em 0 0.5em 0; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+  h3 { font-size: 11.5pt; margin: 1.1em 0 0.4em 0; }
+  .abstract { margin: 1em 2em; font-size: 10.5pt; }
+  .abstract b { font-weight: bold; }
+  .box { border-left: 3px solid #666; padding: 0.4em 0.9em; margin: 0.8em 0; background: #f7f7f7; }
+  .formula { text-align: center; font-family: "DejaVu Serif", serif; margin: 0.6em 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 10pt; margin: 0.6em 0 1em 0; }
+  th, td { border-top: 1px solid #999; border-bottom: 1px solid #999; padding: 4px 6px; vertical-align: top; text-align: left; }
+  th { border-bottom: 1.5px solid #333; }
+  .thm { margin: 0.6em 0; }
+  .thm b { font-weight: bold; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 9.5pt; }
+  .small { font-size: 9.5pt; color: #333; }
+</style>
+</head>
+<body>
+
+<h1>奇数贪心轨道：分子有界情形的部分结果与开放问题</h1>
+<p class="author">王泉智</p>
+<p class="date">邮箱：mrhwrn0504@gmail.com　　日期：2026 年 11 月 10 日</p>
+
+<div class="abstract">
+<p><b>摘要。</b>本文研究奇数贪心展开生成的分数轨道。对每个 A ≥ 2，问题是：是否存在无限合法轨道，使其所有约化分子都落在 [2, A] 内。我们用初等方法证明了 A ≤ 4 时不存在这样的轨道；用计算机辅助的有限状态证书证明了 A ≤ 15 时不存在这样的轨道，并用两套独立实现核对。对 A = 16，我们把问题归约到一个周期为 8 的词 W，并证明 W 在素数 2、11、13 上 p-adic 可容许，给出了一个 14 步的整数种子。一般情形、以及分子无界（反复超过任意大界限）的强形式仍然开放。本文精确地陈述这些开放问题，并记录了已证结果与完整猜想之间的缺口。</p>
+</div>
+
+<h2>0. 结果状态总表</h2>
+<p>本文不证明完整猜想。下表列出每项结论的状态，所有正文中的结论都与此表一致。</p>
+<table>
+<tr><th>结论</th><th>状态</th><th>所在节</th></tr>
+<tr><td>A ≤ 4 时不存在无限有界轨道</td><td>已证明（初等；待复核）</td><td>第 2 节</td></tr>
+<tr><td>A ≤ 15 时不存在无限有界轨道</td><td>已证明（计算机辅助）</td><td>第 3 节</td></tr>
+<tr><td>八周期词 W 在素数 2、11、13 上 p-adic 可容许</td><td>已证明（计算机辅助）</td><td>第 4 节</td></tr>
+<tr><td>A = 16 归约到 W（以及 A ≤ 24 归约到 A = 16）</td><td>归约，未完成，来源待核对</td><td>第 4 节</td></tr>
+<tr><td>A ≥ 16 的完整情形</td><td>未解决</td><td>第 5 节</td></tr>
+<tr><td>分子无界的强形式：对每个 M，有无穷多个 k 使 a_k &gt; M</td><td>未解决（与完整猜想等价）</td><td>第 5 节</td></tr>
+<tr><td>对所有 A ≥ 2 的完整猜想</td><td>猜想，未解决</td><td>第 5 节</td></tr>
+</table>
+
+<h2>1. 问题设定</h2>
+<p>设 a/b 为约化分数，b 为奇数。<b>奇数贪心步</b>定义如下：取最小的奇数 q &gt; 0，使得 a·q ≥ b。令</p>
+<div class="formula">r = a·q − b，　g = gcd(r, q²)，　a′ = r / g，　b′ = b·q / g</div>
+<p>则 a′/b′ 仍是约化分数，且分母为奇数。对它继续迭代。</p>
+
+<div class="thm"><b>定义 1.1（合法轨道）</b>　由奇数贪心步反复作用生成的序列 a₁/b₁, a₂/b₂, … 称为<b>合法轨道</b>。若对所有 k 都有 2 ≤ a_k ≤ A，则称它是 <b>A 有界</b>的。</div>
+
+<div class="thm"><b>猜想 1.2</b>　对每个 A ≥ 2，不存在无限 A 有界合法轨道。等价地，每条无限合法轨道都满足 sup_k a_k = ∞。</div>
+
+<p class="small">有限轨道，以及只在数值上验证的例子，都不算反例。反例必须是真正的无限合法轨道。</p>
+
+<h2>2. 小界情形：A ≤ 4</h2>
+<div class="box"><b>状态：已证明（初等；待复核）。</b>本节给出证明要点。完整的逐步推导尚未逐条核对，在核对完成前不应作为定理引用。</div>
+
+<p><b>命题 2.1</b>（待复核）　当 A ≤ 4 时，不存在无限 A 有界合法轨道。</p>
+<p><b>证明要点。</b>记 δ_k = r_k / a_k。当 a_k ≤ A 时，δ_k 取值于有限集合 D_A 中，且相邻值满足 |δ_{k+1} − δ_k| ≥ 1/A²。再结合递推式 q_{k+1} = q_k²/δ_k − q_k + δ_{k+1}，对 A ≤ 4 逐一检查转移，可以排除无限路径。</p>
+<p>需要重新推导并用短脚本验证的恒等式包括两步恒等式：</p>
+<div class="formula">a_k n_k² + g_k g_{k+1} a_{k+2} = g_k a_{k+1} (n_k + n_{k+1})</div>
+
+<h2>3. 计算机辅助结果：A ≤ 15</h2>
+<div class="box"><b>状态：已证明（计算机辅助）。</b>结论依赖下面的方法和程序的正确性，需要外部复核。</div>
+
+<p><b>命题 3.1</b>（计算机辅助）　当 A ≤ 15 时，不存在无限 A 有界合法轨道。</p>
+
+<h3>3.1 方法</h3>
+<p>把状态取为 (a, r, q mod M)，其中 M 是合适的模数。对每个状态计算下一步可能的转移，然后反复删除没有后继（在状态集合内）的状态，即迭代修剪。若最终存活集合为空，则在剩余类模型中不存在无限有界轨道。一条真正的无限轨道在每一轮修剪中都会留下对应的状态，所以集合为空就证明了命题。</p>
+
+<h3>3.2 两套独立实现</h3>
+<ul>
+<li><b>trim</b>：在 (a, r, q mod M) 上做状态修剪。</li>
+<li><b>btrim</b>：直接在 (a, b mod M) 上用整数运算修剪，与前者独立实现。取 M = 720720 时，btrim 对 9 ≤ A ≤ 15 的存活集合为空，与 trim 一致。</li>
+</ul>
+
+<h3>3.3 旁证</h3>
+<p>对 2 ≤ A ≤ 8，用剩余类深度优先搜索精确计算了有界游程的最大长度，依次为 0, 1, 2, 4, 5, 7, 7。</p>
+
+<h3>3.4 局限</h3>
+<p>结论依赖模数 M 的选取以及实现的正确性。目前尚未由独立人员从头重跑。代码和校验和将随论文一并发布。</p>
+
+<h2>4. A = 16 的归约与八周期词</h2>
+<div class="box"><b>状态：归约未完成，来源待核对。</b>断言"A ≤ 24 可归约到 A = 16"以及"A = 16 时唯一的候选结构是八周期"，来自一份备用研究记录（第 R49、R50 轮）。本文没有自行重新推导这一归约。我们自己的扩展搜索与之一致，并且也只找到这一个候选周期结构。</div>
+
+<p>令八周期词 W = (8, 11, 16, 13, 16, 11, 8, 13)，其每一步的 g 都等于 1。</p>
+
+<div class="thm"><b>命题 4.1</b>（计算机辅助）　词 W 在素数 p = 2、11、13 上是 p-adic 可容许的，且这些素数上的每个分支都是完整分支。</div>
+
+<div class="thm"><b>命题 4.2</b>（计算机辅助）　整数 q₀ = 491458458962611 mod 876948437860352 给出起点分数 8/3931667671700877，其轨道按词 W 运行了 14 步。</div>
+
+<div class="box"><b>注意。</b>上述结果不能推出无限轨道的存在。可容许性只在三个素数上检验，14 步的种子也不是无限轨道。我们还检验了 W 在所有 p ≤ 47 的素数上的存在型存活性（q mod p^s 上是否存在能无限延续的提升），结果是 W 在每个被检验的素数上都存活，没有任何单个素数能给出空集，因此 Mahler 式的单素数嵌套论证不能用来排除 W。</div>
+
+<h2>5. 无界情形与开放问题</h2>
+<div class="box"><b>状态：未解决。</b></div>
+
+<p>无界情形的目标是：对任意合法无限轨道，分子无界，并且对任意大的 M，分子反复超过 M。仅证明 sup a_k = ∞ 是不够的。</p>
+
+<p><b>关键观察。</b>强无界形式与猜想 1.2 等价。证明如下：若某条无限轨道从某个 k₀ 起满足 a_k ≤ M，那么把 a_{k₀}/b_{k₀} 当作新的起点，其后的整条尾部就是一条无限、分子全在 [2, M] 内的合法轨道，这就是 A = M 的反例。反之亦然。因此 A ≥ 16 的情形已被强无界问题包含，不需要单独处理。</p>
+
+<p>已收集的必要条件都只把问题局限在有限的片段里，没有给出无限性的闭合机制。</p>
+
+<p><b>判断。</b>我们认为三个缺口本质上是同一件事：从"对每个有限长度都有初值"推出"存在一个初值对所有长度都有效"。目前没有已知方法可以完成这一步。</p>
+
+<h2>6. 启发式证据（非证明）</h2>
+<div class="box"><b>本节不是证明，只作为实验性证据。</b></div>
+
+<p><b>随机起点。</b>随机抽取 6000 个分数，分母为 300 位奇数，分子在 [2, 200) 内。其中 4872 个进入追踪，且全部在 400 步内终止，最长为 17 步，最大分子为 182。其余 1128 个样本未纳入统计，排除原因尚待核对。</p>
+
+<table>
+<tr><th>步数 n</th><th>轨道长度超过 n 的比例</th></tr>
+<tr><td>3</td><td>69.3%</td></tr>
+<tr><td>6</td><td>21.6%</td></tr>
+<tr><td>9</td><td>3.9%</td></tr>
+<tr><td>12</td><td>0.55%</td></tr>
+<tr><td>15</td><td>0.041%</td></tr>
+<tr><td>16</td><td>0.021%</td></tr>
+</table>
+
+<p><b>Brown 型构造。</b>对分数族 3/(N!−1)，当 N 取 5 至 60、80、100、150、200、300、400 时，轨道全部终止，上升段长度约为 N。N = 49 因精度损失未能判定，不计为终止。</p>
+
+<p><b>解读限制。</b>概率随步数呈指数衰减，但这只是对随机样本的统计判断，不能推出任何无限轨道不存在。</p>
+
+<h2>7. 讨论、路线与下一步</h2>
+<p>完整猜想仍未解决。下面的路线表列出我们搜索并验证过的方法及其状态。</p>
+
+<table>
+<tr><th>路线</th><th>是否对所有 A 统一</th><th>验证状态</th></tr>
+<tr><td>子贪心有限性（Eppstein）：每个分数只有有限多个子贪心展开</td><td>是</td><td>对 y ≤ 2500 的计算验证。要推出奇数贪心终止，还需要切换点展开两两不同的引理，该引理未被证明。朴素切换会出现重复展开，通常是因为普通贪心的尾部与奇数续接恰好一致。</td></tr>
+<tr><td>嵌套剩余类（Mahler 式，参见 Kumar）</td><td>否，只适用于固定的 A</td><td>对八周期词 W 失败：在检验的每个素数 p ≤ 47 上，存在型存活集合都非空。</td></tr>
+<tr><td>密度论证（Collatz 式，参见 Tao）</td><td>否，只给出"几乎所有"起点</td><td>不是对猜想的证明，是另一个目标。</td></tr>
+<tr><td>显式长构造（Brown、Wagon）</td><td>否</td><td>3/(N!−1) 族在 N ≤ 400 时全部终止（N = 49 除外，因精度损失）。</td></tr>
+</table>
+
+<p>文献中没有找到任何统一路线的证明。Conlon 等人关于计数的结果，以及 Graham–Butler 关于素因子分母的结果，都是不同的问题，不能直接套用。</p>
+
+<p><b>发表前必须完成的工作：</b>(1) 证明或否定切换点不同性引理；(2) 由独立人员重跑 A ≤ 15 的证书；(3) 逐条对照原始文献核对每一条引用。</p>
+
+<h2>参考文献（全部待核对）</h2>
+<table>
+<tr><th>来源</th><th>用途</th><th>核对状态</th></tr>
+<tr><td>Erdős Problems，第 282 题（erdosproblems.com）</td><td>题目定义与开放状态</td><td>待当日核对</td></tr>
+<tr><td>Pihko 等人关于分数贪心展开的工作</td><td>背景</td><td>待核对原文</td></tr>
+<tr><td>Louwsma 与 Martino，arXiv:2309.07280（2023）</td><td>固定长度的奇数贪心展开</td><td>待核对原文</td></tr>
+<tr><td>Koizumi</td><td>相关的贪心展开</td><td>待核对原文</td></tr>
+<tr><td>Eppstein，子贪心展开博客（2007）</td><td>子贪心有限性猜想</td><td>待核对原文</td></tr>
+<tr><td>Brown，MathPages 文章 "The Greedy Algorithm for Unit Fractions"</td><td>长展开与递推方法</td><td>待核对原文</td></tr>
+<tr><td>Kumar，arXiv:2411.03468（2024）</td><td>Mahler 3/2 问题的整数情形</td><td>待核对原文</td></tr>
+<tr><td>Tao，arXiv:1909.03562（2019）</td><td>Collatz 的几乎所有轨道</td><td>待核对原文</td></tr>
+</table>
+<p class="small">以上文献中，我们只通过搜索摘要确认了部分内容。其余信息来自记忆，正式引用前需要逐条打开原文核对。</p>
+
+</body>
+</html>
